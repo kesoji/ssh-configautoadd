@@ -1,0 +1,51 @@
+#!/bin/bash
+
+while getopts p:i: OPT; do
+    case $OPT in
+        "p" ) PORT="$OPTARG" ;;
+        "i" ) IDENTITYFILE="$OPTARG" ;;
+    esac
+done
+
+SSHHOST=`echo "$@" | sed -r 's/.*[^ ]+@([^ ]+)/\1/'`
+if [ $# -ne 1 ] ; then
+    SSHUSER=`echo "$@" | sed -r 's/.* ([^ ]+)@.*/\1/'`
+else
+    SSHUSER=`echo "$@" | sed -r 's/([^ ]+)@.*/\1/'`
+fi
+
+echo $SSHHOST | fgrep -q " "
+if [ $? -eq 0 ] ; then
+    echo "ssh -p PORT -i Identityfile user@hostname 形式でないと自動登録できません...ごめんなさい..."
+else
+    fgrep -q "$SSHHOST" ~/.ssh/config
+    if [ $? -ne 0 ] ; then
+        echo -n "$SSHHOST は ~/.ssh/configに登録されていません。 登録しますか？ (y/N): "
+        read ANS
+        if [ "$ANS" == "y" ]; then
+            echo -n "名前(Host)を入力して下さい: "
+            read HOST
+
+            echo "" | tee -a ~/.ssh/config
+            echo "#Auto-added by ssh_configautoadd `date +"%Y%m%d-%H%M%S"`" | tee -a ~/.ssh/config
+            echo "Host $HOST" | tee -a ~/.ssh/config
+            echo "    HostName $SSHHOST" | tee -a ~/.ssh/config
+
+            if [ ! -z "$SSHUSER" ] ; then
+                echo "    User $SSHUSER" | tee -a ~/.ssh/config
+            fi
+
+            if [ ! -z "$PORT" ] ; then
+                echo "    Port $PORT" | tee -a ~/.ssh/config
+            fi
+
+            if [ ! -z "$IDENTITYFILE" ] ; then
+                echo "    IdentityFile $IDENTITYFILE" | tee -a ~/.ssh/config
+            fi
+
+            echo "登録完了しました"
+        fi
+    fi
+fi
+
+exec ssh "$@"

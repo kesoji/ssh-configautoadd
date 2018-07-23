@@ -1,9 +1,9 @@
 # SSH Config Auto-add
 
 ```
-mv ssh_configautoadd /path/to/somewehere_in_the_$PATH/
-chmod +x /path/to/somewhere_in_the_$PATH/ssh_configautoadd
-echo "alias ssh=ssh_configautoadd" >> ~/.bashrc
+mv ssh-configautoadd /path/to/somewehere_in_the_$PATH/
+chmod +x /path/to/somewhere_in_the_$PATH/ssh-configautoadd
+echo "alias ssh=ssh-configautoadd" >> ~/.bashrc
 ```
 
 ## Description
